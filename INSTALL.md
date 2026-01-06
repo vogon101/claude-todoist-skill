@@ -16,7 +16,7 @@ This automatically:
 
 Your `.env` file contains:
 ```
-TODOIST_API_TOKEN=4f32432f58a650d8ab12a0e61ce191024bfb3c83
+TODOIST_API_TOKEN=TOKEN_HERE
 ```
 
 The Python script automatically loads this file.
