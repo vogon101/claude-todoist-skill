@@ -1,0 +1,24 @@
+# Environment files
+.env
+.env.local
+
+# Virtual environment
+.claude/skills/todoist/venv/
+venv/
+env/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+
+# macOS
+.DS_Store
+
+# Editor directories
+.vscode/
+.idea/
+
+# Test files
+test_*.sh
