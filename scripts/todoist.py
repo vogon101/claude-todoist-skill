@@ -222,6 +222,7 @@ def main():
     update_parser.add_argument("--content", help="New content")
     update_parser.add_argument("--due", help="New due date")
     update_parser.add_argument("--priority", type=int, choices=[1, 2, 3, 4], help="New priority")
+    update_parser.add_argument("--description", help="New description")
 
     # tasks complete
     complete_parser = tasks_subparsers.add_parser("complete", help="Complete a task")
@@ -299,6 +300,8 @@ def main():
                 kwargs["due_string"] = args.due
             if args.priority:
                 kwargs["priority"] = args.priority
+            if args.description:
+                kwargs["description"] = args.description
 
             task = client.update_task(args.task_id, **kwargs)
             print(f"✓ Updated: {format_task(task, verbose=True)}")
