@@ -52,10 +52,14 @@ def load_env_file():
     return False
 
 
+import uuid as uuid_lib
+
+
 class TodoistClient:
     """Simple Todoist API client"""
 
     BASE_URL = "https://api.todoist.com/rest/v2"
+    SYNC_URL = "https://api.todoist.com/sync/v9/sync"
 
     def __init__(self, token: Optional[str] = None):
         # Try to load from .env file if not in environment
@@ -139,6 +143,28 @@ class TodoistClient:
     def delete_task(self, task_id: str) -> None:
         """Delete a task"""
         self._request("DELETE", f"tasks/{task_id}")
+
+    def move_task(self, task_id: str, project_id: str) -> bool:
+        """Move a task to a different project using Sync API"""
+        command = {
+            "type": "item_move",
+            "uuid": str(uuid_lib.uuid4()),
+            "args": {
+                "id": task_id,
+                "project_id": project_id
+            }
+        }
+        try:
+            response = requests.post(
+                self.SYNC_URL,
+                headers=self.headers,
+                json={"commands": [command]}
+            )
+            response.raise_for_status()
+            return True
+        except requests.exceptions.RequestException as e:
+            print(f"Error moving task: {e}", file=sys.stderr)
+            return False
 
     # Projects
     def get_projects(self) -> List[Dict]:
@@ -232,6 +258,11 @@ def main():
     delete_parser = tasks_subparsers.add_parser("delete", help="Delete a task")
     delete_parser.add_argument("task_id", help="Task ID")
 
+    # tasks move
+    move_parser = tasks_subparsers.add_parser("move", help="Move a task to a different project")
+    move_parser.add_argument("task_id", help="Task ID")
+    move_parser.add_argument("project_id", help="Destination project ID")
+
     # tasks search
     search_parser = tasks_subparsers.add_parser("search", help="Search tasks by content")
     search_parser.add_argument("query", help="Search query")
@@ -313,6 +344,13 @@ def main():
         elif args.action == "delete":
             client.delete_task(args.task_id)
             print(f"✓ Deleted task {args.task_id}")
+
+        elif args.action == "move":
+            if client.move_task(args.task_id, args.project_id):
+                print(f"✓ Moved task {args.task_id} to project {args.project_id}")
+            else:
+                print(f"✗ Failed to move task {args.task_id}")
+                sys.exit(1)
 
         elif args.action == "search":
             tasks = client.get_tasks()
